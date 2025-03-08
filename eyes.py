@@ -48,8 +48,6 @@ bot_CTRLs_name = ['bot_in', 'bot', 'bot_out']
 
 top_CVs = ['lid_top_drv_low_CRV.cv[0]', 'lid_top_drv_low_CRV.cv[2]', 'lid_top_drv_low_CRV.cv[3]', 'lid_top_drv_low_CRV.cv[4]', 'lid_top_drv_low_CRV.cv[6]']
 bot_CVs = ['lid_bot_drv_low_CRV.cv[2]', 'lid_bot_drv_low_CRV.cv[3]', 'lid_bot_drv_low_CRV.cv[4]']
-top_space_lst = []
-bot_space_lst = []
 
 # get CV positions
 def get_cv_positions(cvs):
@@ -64,7 +62,7 @@ is_outer = abs(top_positions[0][0]) > abs(top_positions[-1][0])
 # reverse control order if outer edge is first
 if is_outer:
     top_CTRLs_name.reverse()
-    bot_space_lst.reverse()
+    bot_CTRLs_name.reverse()
 
 # duplicate and move the controls
 def create_controls(ctrl_names, positions, suffix=""):
@@ -74,7 +72,7 @@ def create_controls(ctrl_names, positions, suffix=""):
         cmds.move(*pos, grp)
 
 create_controls(top_CTRLs_name, top_positions)
-create_controls(bot_space_lst, bot_positions)
+create_controls(bot_CTRLs_name, bot_positions)
 
 # clean up
 cmds.delete('ball_GRP')
