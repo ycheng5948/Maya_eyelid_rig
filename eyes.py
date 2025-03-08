@@ -50,42 +50,33 @@ top_CVs = ['lid_top_drv_low_CRV.cv[0]', 'lid_top_drv_low_CRV.cv[2]', 'lid_top_dr
 bot_CVs = ['lid_bot_drv_low_CRV.cv[2]', 'lid_bot_drv_low_CRV.cv[3]', 'lid_bot_drv_low_CRV.cv[4]']
 top_space_lst = []
 bot_space_lst = []
-for cv in top_CVs:
-    space = cmds.xform(cv, q=1, t=1, ws=1)
-    top_space_lst.append(space)
 
-for cv in bot_CVs:
-    space = cmds.xform(cv, q=1, t=1, ws=1)
-    bot_space_lst.append(space)
-    
-# identify the inner and outer CVs' spaces
-if abs(top_space_lst[0][0]) > abs(top_space_lst[-1][0]):
-    print('space0 is outter edge')
-    top_CTRLs_name = top_CTRLs_name[::-1]
-    bot_CTRLs_name = bot_CTRLs_name[::-1]
-    for name, space in zip(top_CTRLs_name, top_space_lst):
-        grp = cmds.duplicate('ball_GRP', name='lid_{0}_GRP'.format(name), rc=1)[0]
-        ctrl = cmds.listRelatives(grp, c=True)[0]
-        ctrl = cmds.rename(ctrl, 'lid_{0}_CTRL'.format(name))
-        cmds.move(space[0], space[1], space[2], grp)
-    for name, space in zip(bot_CTRLs_name, bot_space_lst):
-        grp = cmds.duplicate('ball_GRP', name='lid_{0}L_GRP'.format(name), rc=1)[0]
-        ctrl = cmds.listRelatives(grp, c=True)[0]
-        ctrl = cmds.rename(ctrl, 'lid_{0}_CTRL'.format(name))
-        cmds.move(space[0], space[1], space[2], grp)
-else:
-    print('space0 is inner edge')
-    for name, space in zip(top_CTRLs_name, top_space_lst):
-        grp = cmds.duplicate('ball_GRP', name='lid_{0}_GRP'.format(name), rc=1)[0]
-        ctrl = cmds.listRelatives(grp, c=True)[0]
-        ctrl = cmds.rename(ctrl, 'lid_{0}_CTRL'.format(name))
-        cmds.move(space[0], space[1], space[2], grp)
-    for name, space in zip(bot_CTRLs_name, bot_space_lst):
-        grp = cmds.duplicate('ball_GRP', name='lid_{0}_GRP'.format(name), rc=1)[0]
-        ctrl = cmds.listRelatives(grp, c=True)[0]
-        ctrl = cmds.rename(ctrl, 'lid_{0}_CTRL'.format(name))
-        cmds.move(space[0], space[1], space[2], grp)
+# get CV positions
+def get_cv_positions(cvs):
+    return [cmds.xform(cv, q=1, t=1, ws=1) for cv in cvs]
 
+top_positions = get_cv_positions(top_CVs)
+bot_positions = get_cv_positions(bot_CVs)
+
+# determine if first CV is outer or inner
+is_outer = abs(top_positions[0][0]) > abs(top_positions[-1][0])
+
+# reverse control order if outer edge is first
+if is_outer:
+    top_CTRLs_name.reverse()
+    bot_space_lst.reverse()
+
+# duplicate and move the controls
+def create_controls(ctrl_names, positions, suffix=""):
+    for name, pos in zip(ctrl_names, positions):
+        grp = cmds.duplicate('ball_GRP', name='lid_{0}_GRP{1}'.format(name, suffix), rc=1)[0]
+        ctrl = cmds.rename(cmds.listRelatives(grp, c=1)[0], 'lid_{0}_CTRL'.format(name))
+        cmds.move(*pos, grp)
+
+create_controls(top_CTRLs_name, top_positions)
+create_controls(bot_space_lst, bot_positions)
+
+# clean up
 cmds.delete('ball_GRP')
 
 # creating joints based on CTRLs' names to bind the curves
