@@ -219,3 +219,11 @@ cmds.delete('ring_GRP')
 ###################################################################
 # setting up lid_mst_CTRL and eye_mst_CTRL #manual
 ###################################################################
+# adding direct scale connection from lid_JNTs to the lid_top/bot_JNTs
+L_lid_JNTs = cmds.ls('L_*_lid_*_JNT')
+for i in L_lid_JNTs:
+    cmds.connectAttr('L_lid_JNT.s', '{0}.s'.format(i))
+ 
+R_lid_JNTs = cmds.ls('R_*_lid_*_JNT')
+for i in R_lid_JNTs:
+    cmds.connectAttr('R_lid_JNT.s', '{0}.s'.format(i))
